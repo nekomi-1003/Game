@@ -1,7 +1,6 @@
 print("Do You Want To Play,SQUID GAME?")
 print("DISCLAMER!","Careful what you've' choose!")
 player_1 = input("Enter Your Name:")
-
 print( "----------","1.Yellow")
 print("----------","2. White")
 print("----------","3. Red")

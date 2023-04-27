@@ -1,0 +1,301 @@
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+
+public class Invsystest {
+    
+    private static final String LOG_FILE = "inventory_log.txt";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
+    //LOGIN
+    private static boolean login() {
+    while (true) {
+    Scanner input = new Scanner(System.in);
+    String username, password;
+    System.out.println("----------------------------------------");
+    System.out.println("--------------ADMIN-LOGIN---------------");
+    System.out.println("----------------------------------------");
+    System.out.print("ENTER USERNAME: ");
+    username = input.nextLine();
+    System.out.print("ENTER PASSWORD: ");
+    password = input.nextLine();
+    System.out.println("----------------------------------------");
+    // Check if the username and password match
+    if (username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("admin")) {
+        System.out.println("Login successful!");
+        return true;
+    } else {
+    System.out.println("INVALID USERNAME OR PASSWORD. PLEASE TRY AGAIN!");}
+    }
+    }
+        
+     
+        public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        String[] products = {"COKE", "SPRITE", "ROYAL", "BOTTLED WATER", "JUICE"};
+        int[] quantity = {10, 12, 11, 15, 10};
+        boolean found = false;
+        
+        while (true){
+        if (!login()) {
+        //PROGRAM EXIT IF THE USER ISN'T AUTHENTICATED
+        break;
+        }
+        
+        outerLoop: while (true){
+        System.out.println("----------------------------------------");
+        System.out.println("       [FABS BEVERAGES INVENTORY]");
+        System.out.println("----------------------------------------");
+        System.out.println("         [AVAILABLE PRODUCTS]");
+        System.out.println("----------------------------------------");
+        System.out.println("    ITEM QUANTITY |  ITEM NAME");
+        System.out.println("----------------------------------------");
+        for (int i = 0; i < products.length; i++) {
+        System.out.println("          ["+ quantity[i] +"]    =    " +products[i]);}
+        
+        System.out.println("----------------------------------------");
+        System.out.println("               SELECT:");
+        System.out.println("[A] UPDATE PRODUCTS");
+        System.out.println("[B] PRODUCTS LOG");
+        System.out.println("[C] LOGOUT");
+        System.out.println("----------------------------------------");
+        System.out.print(">>> ");
+        String choice = input.nextLine();
+        
+        //[A] UPDATE PRODUCTS
+          if (choice.equalsIgnoreCase("a")){
+                System.out.println("----------------------------------------");
+                System.out.println("        UPDATE PRODUCTS");
+                System.out.println("[A] ADD PRODUCT");
+                System.out.println("[B] ADD STOCK ");
+                System.out.println("[C] REMOVE PRODUCT");
+                System.out.println("[D] STOCK OUT");
+                System.out.println("[E] RETURN TO MENU");
+                System.out.println("----------------------------------------");
+                System.out.print(">>> ");
+                String choice1 = input.nextLine();
+                
+                //[A] ADD PRODUCT
+                if (choice1.equalsIgnoreCase("a")){
+
+                    System.out.println("----------------------------------------");
+                    System.out.println("         [AVAILABLE PRODUCTS]");
+                    System.out.println("----------------------------------------");
+                    System.out.println("    ITEM QUANTITY |  ITEM NAME");
+                    System.out.println("----------------------------------------");
+                    for (int i = 0; i < products.length; i++) {
+                    System.out.println("          ["+ quantity[i] +"]    =    " +products[i]);}
+                    System.out.print("ENTER PRODUCT TO ADD (Enter C to cancel): ");
+                    String newproduct = input.nextLine();
+                    if (newproduct.equalsIgnoreCase("C")){
+                        break;
+                    }
+                    
+                    //CHECKS IF THE ENTERED PRODUCT ALREADY EXISTS
+                    for (int i = 0; i < products.length; i++) {
+                        if (products[i].equalsIgnoreCase(newproduct)) {
+                        System.out.print("Product already in stock. Do you want to add quantity instead? (Y/N): ");
+                        String addQuantity = input.nextLine();
+                            if (addQuantity.equalsIgnoreCase("Y")) {
+                                System.out.print("Enter quantity to add: ");
+                                int qty = input.nextInt();
+                                if (qty < 0){//CHECKS IF THE INPUT IS A NEGATIVE NUMBER
+                                System.out.println("You can't put a negative number!");
+                                break;}
+                                quantity[i] += qty;
+                                System.out.println("Product quantity updated. New quantity: " + quantity[i]);
+                                logInventoryUpdate("Added " + addQuantity + " 12 cases/bundles of " + newproduct.toUpperCase() + " in the inventory.");
+                                found = true;}
+                                else {
+                                found = true;}  //"Added " + newproduct.toUpperCase()  + " with " + addQuantity + "cases/bundle to the inventory.");
+                                }
+                        //THE PROCESS IF THE PRODUCT ISN'T PRESENT IN LIST
+                        if(!found){
+                        System.out.print("Enter the quantity of the new product: ");
+                        int newquantity = input.nextInt();
+                        if (newquantity < 0){//CHECKS IF THE INPUT IS A NEGATIVE NUMBER
+                        System.out.println("You can't put a negative number!");
+                        break;}
+                        input.nextLine(); // consume newline character
+                        String[] newproducts = new String[products.length + 1];
+                        int[] newquantityarr = new int[quantity.length + 1];
+                        System.arraycopy(products, 0, newproducts, 0, products.length);
+                        System.arraycopy(quantity, 0, newquantityarr, 0, quantity.length);
+                        newproducts[newproducts.length -1] = newproduct.toUpperCase();
+                        newquantityarr[newquantityarr.length -1] = newquantity;
+                        products = newproducts;
+                        quantity = newquantityarr;
+                        System.out.println("New product added!");
+                        logInventoryUpdate("Added " + newproduct.toUpperCase()  + " with " + newquantity + "cases/bundle to the inventory.");
+                        System.out.print("Enter any key to return: ");
+                        String anykey = input.nextLine();
+                        break;}
+                        }
+                        }
+                
+                //[B] ADD STOCK
+               else if (choice1.equalsIgnoreCase("b")) {
+                    System.out.println("----------------------------------------");
+                    System.out.println("         [AVAILABLE PRODUCTS]");
+                    System.out.println("----------------------------------------");
+                    System.out.println("    ITEM QUANTITY |  ITEM NAME");
+                    System.out.println("----------------------------------------");
+                    for (int i = 0; i < products.length; i++) {
+                    System.out.println("          ["+ quantity[i] +"]    =    " +products[i]);}
+                    System.out.println("----------------------------------------");
+                    System.out.print("ENTER PRODUCT NAME TO ADD QUANTITY TO (Enter C to cancel): ");
+                    String newproduct = input.nextLine();
+                    if (newproduct.equalsIgnoreCase("C")){
+                        found = true;}
+                    for (int i = 0; i < products.length; i++) {
+                        if (products[i].equalsIgnoreCase(newproduct)) {
+                            System.out.print("ENTER THE QUANTITY TO ADD: ");
+                            int newquantity = input.nextInt();
+                            quantity[i] += newquantity;
+                            System.out.println(newquantity + " cases/bundles of " + newproduct.toUpperCase() + " has been added to the inventory.");
+                            found = true;
+                            input.nextLine(); // consume newline character
+                            logInventoryUpdate(newquantity + " cases/bundles of " + newproduct.toUpperCase() + " has been added to the inventory.");
+                            // Exit the for loop because the product was found
+                            break;}
+                            }
+                    if (!found) {
+                        System.out.println(newproduct.toUpperCase() + " IS NOT IN THE INVENTORY!");
+                        System.out.print("Enter any key to return: ");
+                        String anykey = input.nextLine();
+                        }
+                        }
+                
+                //[C]REMOVE PRODUCTS
+                else if (choice1.equalsIgnoreCase("c")){
+
+                    System.out.println("----------------------------------------");
+                    System.out.println("         [AVAILABLE PRODUCTS]");
+                    System.out.println("----------------------------------------");
+                    System.out.println("    ITEM QUANTITY |  ITEM NAME");
+                    System.out.println("----------------------------------------");
+                    for (int i = 0; i < products.length; i++) {
+                    System.out.println("          ["+ quantity[i] +"]    =    " +products[i]);}
+                    System.out.println("----------------------------------------");
+                    System.out.print("ENTER PRODUCT NAME TO REMOVE (Enter C to cancel): ");
+                    String productToRemove = input.nextLine();
+                        if (productToRemove.equalsIgnoreCase("C")){
+                        break;}
+                    for (int i = 0; i < products.length; i++) {
+                        if (products[i].equalsIgnoreCase(productToRemove)) {
+                            System.arraycopy(products, i + 1, products, i, products.length - 1 - i);
+                            System.arraycopy(quantity, i + 1, quantity, i, quantity.length - 1 - i);
+                            products = Arrays.copyOf(products, products.length - 1);
+                            quantity = Arrays.copyOf(quantity, quantity.length - 1);
+                            System.out.println("SUCCESSFULLY REMOVED "+ productToRemove.toUpperCase() + " FROM THE INVENTORY!");
+                            logInventoryUpdate("Removed "+ productToRemove.toUpperCase() + " from inventory.");
+                            found = true;
+                            System.out.print("Enter any key to continue: ");
+                            String anykey = input.nextLine();
+                            break;}
+                            }
+                        if (!found) {
+                            System.out.println(productToRemove.toUpperCase() + " is not in the inventory.");}
+                            System.out.print("Enter any key to continue: ");
+                            String anykey = input.nextLine();
+                            }
+                
+                //[D] STOCK OUT
+                else if (choice1.equalsIgnoreCase("d")){
+                    System.out.println("----------------------------------------");
+                    System.out.print("ENTER PRODUCT NAME TO TAKE STOCK(Enter C to cancel): ");
+                    String productToRemove = input.nextLine();
+                    if (productToRemove.equalsIgnoreCase("C")){
+                    found = true;}
+                    
+                    //CHECKS IF PRODUCT IS IN THE LIST
+                    for (int i = 0; i < products.length; i++) {
+                        if (products[i].equalsIgnoreCase(productToRemove)) {
+                            System.out.print("Enter quantity to remove: ");
+                            int qtyToRemove = input.nextInt();
+                            if (qtyToRemove > quantity[i]) {
+                                System.out.println("Error: Not enough quantity available to remove.");
+                                System.out.print("Enter any key to return: ");
+                                String anykey = input.nextLine();
+                                break;}
+                            quantity[i] -= qtyToRemove;
+                            System.out.println(qtyToRemove + " units of " + productToRemove.toUpperCase() + " removed from the inventory.");
+                            logInventoryUpdate("Removed " + qtyToRemove + " cases of " + productToRemove.toUpperCase() + " from inventory.");
+                            found = true;
+                            input.nextLine(); // consume newline character
+                            System.out.print("Enter any key to return: ");
+                            String anykey = input.nextLine();
+                            // Exit the for loop because the product was found
+                            break;}
+                            }
+                        //IF PRODUCT ENTERED DOESN'T EXIST
+                        if (!found) {
+                            System.out.println(productToRemove.toUpperCase() + " is not in the inventory.");}
+                                }
+
+                //[E] RETURN
+                    else if (choice1.equalsIgnoreCase("e")){
+                        found = true;}
+          }
+          //[B] MANAGE
+          else if (choice.equalsIgnoreCase("b")){
+              System.out.println("----------------------------------------");
+              displayLogFileContents();
+              System.out.println("----------------------------------------");
+              System.out.print("ENTER ANY KEY TO CONTINUE: ");
+              String anykey = input.nextLine();}
+          //[C] LOGOUT
+          else if (choice.equalsIgnoreCase("c")){
+              break;}
+        }
+    }
+}
+    
+    //LOG
+        private static void logInventoryUpdate(String message) {
+        try {
+            // Get the current date and time
+            LocalDateTime now = LocalDateTime.now();
+
+            // Open the log file in append mode
+            FileWriter writer = new FileWriter(LOG_FILE, true);
+
+            // Write the log message with the current date and time to the file
+            writer.write(now.format(DATE_TIME_FORMATTER) + " - " + message + "\n");
+
+            // Close the file
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error writing to log file: " + e.getMessage());
+        }
+    }
+        
+       //DISPLAY / READ LOG
+        private static void displayLogFileContents() {
+        try {
+            // Open the log file in read mode
+            FileReader reader = new FileReader(LOG_FILE);
+
+            // Wrap the file reader in a buffered reader for efficient reading
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            // Read each line of the log file and print it to the console
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            // Close the file
+            bufferedReader.close();
+        } catch (IOException e) {
+            System.out.println("Error reading log file: " + e.getMessage());
+        }
+    }
+}
